@@ -31,7 +31,11 @@ public class LocaleContextProvider extends
 			language = DEFAULT_LANGUAGE;
 		}
 		
-		return Locale.forLanguageTag(language);
+		if(language.equals("en")) {
+			return Locale.ENGLISH;
+		} else {
+			return Locale.FRANCE;
+		}
 	}
 
 	private String languageFromHeader(HttpRequestContext request) {

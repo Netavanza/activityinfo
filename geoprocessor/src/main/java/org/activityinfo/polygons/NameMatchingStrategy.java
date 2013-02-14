@@ -7,7 +7,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Logger;
 
-import org.activityinfo.jsonrpc.AdminEntity;
+import org.activityinfo.jsonrpc.AdminUnit;
 import org.opengis.feature.simple.SimpleFeature;
 
 import com.google.common.base.Strings;
@@ -15,7 +15,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
-public class NameMatchingStrategy {
+public class NameMatchingStrategy implements MatchingStrategy {
 	
 	private static final Logger LOGGER = Logger.getLogger(NameMatchingStrategy.class.getName());
 	
@@ -24,18 +24,18 @@ public class NameMatchingStrategy {
 	private Map<String, Integer> nameMap = Maps.newHashMap();
 	private Set<String> notFound = Sets.newHashSet();
 
-	public NameMatchingStrategy(List<AdminEntity> entities, Properties properties) {
+	public NameMatchingStrategy(List<AdminUnit> entities, Properties properties) {
 		this.properties = properties;
 		
 		this.nameColumn = properties.getProperty("name.column");
 		
-		for(AdminEntity entity : entities) {
+		for(AdminUnit entity : entities) {
 			String key = key(entity.getName());
 			
 			if(nameMap.containsKey(key)) {
 				throw new UnsupportedOperationException("Cannot match by name, there are duplicates: '" + key + "'");
 			}
- 			nameMap.put(key, entity.getId());
+ 			nameMap.put(key, entity.getMachineId());
 		}
 	}
 
@@ -47,6 +47,9 @@ public class NameMatchingStrategy {
 
 
 
+	/* (non-Javadoc)
+	 * @see org.activityinfo.polygons.Strategy#match(org.opengis.feature.simple.SimpleFeature)
+	 */
 	public int match(SimpleFeature feature) {
 		String name = (String) feature.getValue(nameColumn);
 		
@@ -98,6 +101,9 @@ public class NameMatchingStrategy {
 
 
 
+	/* (non-Javadoc)
+	 * @see org.activityinfo.polygons.Strategy#done()
+	 */
 	public void done() {
 		if(!notFound.isEmpty()) {
 			System.err.println("There are polygons that could not be matched to admin entity:" );

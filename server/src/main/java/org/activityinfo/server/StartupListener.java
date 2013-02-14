@@ -19,8 +19,10 @@ import org.activityinfo.server.endpoint.content.ContentModule;
 import org.activityinfo.server.endpoint.export.ExportModule;
 import org.activityinfo.server.endpoint.gwtrpc.GwtRpcModule;
 import org.activityinfo.server.endpoint.healthcheck.HealthCheckModule;
+import org.activityinfo.server.endpoint.hxl.HxlModule;
 import org.activityinfo.server.endpoint.jsonrpc.JsonRpcModule;
 import org.activityinfo.server.endpoint.kml.KmlModule;
+import org.activityinfo.server.endpoint.refine.RefineModule;
 import org.activityinfo.server.event.EventModule;
 import org.activityinfo.server.geo.GeometryModule;
 import org.activityinfo.server.i18n.LocaleModule;
@@ -31,7 +33,6 @@ import org.activityinfo.server.util.beanMapping.BeanMappingModule;
 import org.activityinfo.server.util.config.ConfigModule;
 import org.activityinfo.server.util.logging.LoggingModule;
 import org.activityinfo.server.util.monitoring.MonitoringModule;
-import org.activityinfo.server.util.tracking.TrackingModule;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -80,8 +81,9 @@ public class StartupListener extends GuiceServletContextListener {
                 new MonitoringModule(),
                 new JsonRpcModule(),
                 new KmlModule(),
-                new TrackingModule(),
+                new RefineModule(),
                 new LocaleModule(),
+                new HxlModule(),
                 new LoginModule());
     }
 

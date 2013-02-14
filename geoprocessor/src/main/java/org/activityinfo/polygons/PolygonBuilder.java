@@ -11,7 +11,7 @@ import java.util.Properties;
 import java.util.logging.Logger;
 
 import org.activityinfo.jsonrpc.ActivityInfoService;
-import org.activityinfo.jsonrpc.AdminEntity;
+import org.activityinfo.jsonrpc.AdminUnit;
 import org.geotools.data.FeatureSource;
 import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.geometry.jts.JTS;
@@ -34,8 +34,8 @@ public class PolygonBuilder {
 	
 	private int adminLevelId;
 	private File propertiesFile;
-	private List<AdminEntity> entities;
-	private NameMatchingStrategy matchingStrategy;
+	private List<AdminUnit> entities;
+	private MatchingStrategy matchingStrategy;
 	private Properties properties;
 	private List<OutputWriter> writers = Lists.newArrayList();
 	private File geodbRoot; 
@@ -78,14 +78,13 @@ public class PolygonBuilder {
 	}
 	
 	private void initMatchingStrategy() {
-		String strategyName = properties.getProperty("match", "name");
-		if(strategyName.equals("name")) {
+		if(!Strings.isNullOrEmpty(properties.getProperty("id.column"))) {
+			matchingStrategy = new IdMatchingStrategy(properties);
+		} else {
 			matchingStrategy = new NameMatchingStrategy(
 					entities,
 					properties);
-		} else {
-			throw new UnsupportedOperationException("invalid matching strategy: " + matchingStrategy);
-		}
+		} 
 	}
 	
 	private void initWriters() throws IOException {

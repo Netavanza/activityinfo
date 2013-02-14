@@ -4,13 +4,15 @@ import java.util.List;
 
 public class AdminEntityResult {
 	
-	private List<AdminEntity> data;
+	private List<AdminUnit> units;
 
-	public List<AdminEntity> getData() {
-		return data;
+	public List<AdminUnit> getUnits() {
+		return units;
 	}
 
-	public void setData(List<AdminEntity> data) {
-		this.data = data;
+	public void setUnits(List<AdminUnit> units) {
+		this.units = units;
 	}
+
+
 }

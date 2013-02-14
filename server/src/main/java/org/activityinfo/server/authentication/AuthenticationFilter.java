@@ -65,6 +65,8 @@ public class AuthenticationFilter implements Filter {
 	public void doFilter(ServletRequest request, ServletResponse response,
 			FilterChain filterChain) throws IOException, ServletException {
 
+		System.out.println(((HttpServletRequest)request).getRequestURI());
+		
 		authProvider.clear();
 		
 		String authToken = authTokenFromCookie();

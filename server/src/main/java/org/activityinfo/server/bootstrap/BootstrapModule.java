@@ -8,6 +8,7 @@ package org.activityinfo.server.bootstrap;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.activityinfo.server.bootstrap.jaxrs.FreemarkerTemplateProcessor;
 import org.activityinfo.server.bootstrap.jaxrs.LocaleContextProvider;
 import org.activityinfo.server.bootstrap.jaxrs.RedirectMessageBodyWriter;
 import org.activityinfo.server.bootstrap.jaxrs.TemplateDirectiveMessageBodyWriter;
@@ -26,6 +27,7 @@ public class BootstrapModule extends ServletModule {
     	bind(LocaleContextProvider.class);
     	bind(RedirectMessageBodyWriter.class);
     	bind(TemplateDirectiveMessageBodyWriter.class);
+    	bind(FreemarkerTemplateProcessor.class);
     	
         serve("/ActivityInfo/ActivityInfo.nocache.js").with(SelectionServlet.class);
         serve("/ActivityInfo/ActivityInfo.appcache").with(SelectionServlet.class);

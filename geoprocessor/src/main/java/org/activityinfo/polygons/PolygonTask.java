@@ -42,7 +42,7 @@ public class PolygonTask implements GeoTask {
 
 	private void processAll(File parent) throws Exception {
 		for(File child : parent.listFiles()) {
-			if(child.isDirectory() && !child.getName().equals("GAUL")) {
+			if(child.isDirectory() && child.getName().equals("ML") && !child.getName().equals("GAUL")) {
 				processAll(child);
 			} else if(child.getName().endsWith(".properties")) {
 				try {

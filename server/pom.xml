@@ -505,7 +505,6 @@
 							<modules>
 								<module>org.activityinfo.ActivityInfoProduction</module>
 								<module>org.activityinfo.embed.Embed</module>
-								<module>org.activityinfo.login.Login</module>
 							</modules>
 						</configuration>
 					</execution>
@@ -869,7 +868,6 @@
 									<draftCompile>true</draftCompile>
 									<modules>
 										<module>org.activityinfo.ActivityInfoFFTest</module>
-										<module>org.activityinfo.login.Login</module>
 									</modules>
 									<style>pretty</style>
 								</configuration>
@@ -944,7 +942,6 @@
 									<draftCompile>true</draftCompile>
 									<modules>
 										<module>org.activityinfo.ActivityInfoSafariTest</module>
-										<module>org.activityinfo.login.Login</module>
 									</modules>
 								</configuration>
 								<goals>
@@ -957,23 +954,6 @@
 			</build>
 		</profile>
 
-		<profile>
-			<id>login</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>gwt-maven-plugin</artifactId>
-						<version>1.2</version>
-						<configuration>
-							<draftCompile>true</draftCompile>
-							<module>org.activityinfo.login.Login</module>
-							<runTarget>login.html</runTarget>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
 		<!-- Build the Application Module with a single permutation but with soyc 
 			enabled -->
 		<profile>

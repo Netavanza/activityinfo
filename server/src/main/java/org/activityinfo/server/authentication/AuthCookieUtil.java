@@ -8,8 +8,8 @@ package org.activityinfo.server.authentication;
 import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
-import org.activityinfo.login.shared.AuthenticatedUser;
 import org.activityinfo.server.database.hibernate.entity.Authentication;
+import org.activityinfo.shared.auth.AuthenticatedUser;
 
 public final class AuthCookieUtil {
     

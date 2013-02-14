@@ -9,7 +9,6 @@ import java.util.logging.Logger;
 
 import javax.servlet.ServletContextEvent;
 
-import org.activityinfo.login.server.LoginModule;
 import org.activityinfo.server.attachment.AttachmentModule;
 import org.activityinfo.server.authentication.AuthenticationModule;
 import org.activityinfo.server.bootstrap.BootstrapModule;
@@ -83,8 +82,7 @@ public class StartupListener extends GuiceServletContextListener {
                 new KmlModule(),
                 new RefineModule(),
                 new LocaleModule(),
-                new HxlModule(),
-                new LoginModule());
+                new HxlModule());
     }
 
 }

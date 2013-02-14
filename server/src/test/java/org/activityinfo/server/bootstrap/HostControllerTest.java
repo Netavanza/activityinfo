@@ -7,10 +7,10 @@ package org.activityinfo.server.bootstrap;
 
 import java.util.Properties;
 
-import org.activityinfo.login.shared.AuthenticatedUser;
 import org.activityinfo.server.bootstrap.model.HostPageModel;
 import org.activityinfo.server.bootstrap.model.LoginPageModel;
 import org.activityinfo.server.util.config.DeploymentConfiguration;
+import org.activityinfo.shared.auth.AuthenticatedUser;
 import org.junit.Before;
 import org.junit.Test;
 

@@ -18,8 +18,8 @@ import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
-import org.activityinfo.login.shared.AuthenticatedUser;
 import org.activityinfo.server.bootstrap.model.Redirect;
+import org.activityinfo.shared.auth.AuthenticatedUser;
 
 @Path(LogoutController.ENDPOINT)
 public class LogoutController extends AbstractController {

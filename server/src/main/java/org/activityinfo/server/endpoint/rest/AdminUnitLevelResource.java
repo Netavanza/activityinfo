@@ -60,7 +60,7 @@ public class AdminUnitLevelResource {
         for (AdminEntity entity : level.getEntities()) {
             ObjectNode unit = JsonNodeFactory.instance.objectNode();
             unit.put("id", uri.getBaseUriBuilder()
-                .path(HxlResources.class)
+                .path(RootResource.class)
                 .path("adminUnit")
                 .path(Integer.toString(entity.getId())).build().toString());
             unit.put("name", entity.getName());

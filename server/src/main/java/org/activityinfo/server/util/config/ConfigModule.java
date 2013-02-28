@@ -77,6 +77,13 @@ public class ConfigModule extends ServletModule {
         tryToLoadFromAppEngineDatastore(properties);
         tryToLoadFrom(properties, versionSpecific(context));
 
+        // specified at server start up with
+        // -Dactivityinfo.config=/path/to/conf.properties
+        if (!Strings.isNullOrEmpty(System.getProperty("activityinfo.config"))) {
+            tryToLoadFrom(properties,
+                new File(System.getProperty("activityinfo.config")));
+        }
+
         return new DeploymentConfiguration(properties);
     }
 

@@ -35,6 +35,7 @@ import org.activityinfo.server.command.DispatcherSync;
 import org.activityinfo.server.database.hibernate.entity.AdminEntity;
 import org.activityinfo.server.database.hibernate.entity.AdminLevel;
 import org.activityinfo.server.database.hibernate.entity.Country;
+import org.activityinfo.server.util.blob.BlobService;
 import org.activityinfo.shared.command.GetCountries;
 import org.activityinfo.shared.command.GetSchema;
 import org.activityinfo.shared.dto.CountryDTO;
@@ -50,14 +51,17 @@ import com.wordnik.swagger.annotations.ApiParam;
 public class RootResource {
 
     private Provider<EntityManager> entityManager;
+    private BlobService blobService;
     private DispatcherSync dispatcher;
 
     @Inject
     public RootResource(Provider<EntityManager> entityManager,
+        BlobService blobService,
         DispatcherSync dispatcher) {
         super();
         this.entityManager = entityManager;
         this.dispatcher = dispatcher;
+        this.blobService = blobService;
     }
 
     @Path("/adminUnit/{id}")
@@ -119,8 +123,8 @@ public class RootResource {
 
     @Path("/adminUnitLevel/{id}")
     public AdminUnitLevelResource getAdminUnitLevel(@PathParam("id") int id) {
-        return new AdminUnitLevelResource(entityManager.get().find(
+        return new AdminUnitLevelResource(entityManager, blobService, entityManager.get().find(
             AdminLevel.class, id));
     }
-
+    
 }

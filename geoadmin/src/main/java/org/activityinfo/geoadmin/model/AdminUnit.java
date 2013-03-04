@@ -1,12 +1,9 @@
 package org.activityinfo.geoadmin.model;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-
-@JsonIgnoreProperties(ignoreUnknown=true) 
-public class Country {
+public class AdminUnit {
 	private int id;
-	private String code;
 	private String name;
+	private String code;
 	private Bounds bounds;
 	
 	public int getId() {
@@ -15,17 +12,17 @@ public class Country {
 	public void setId(int id) {
 		this.id = id;
 	}
-	public String getCode() {
-		return code;
-	}
-	public void setCode(String code) {
-		this.code = code;
-	}
 	public String getName() {
 		return name;
 	}
 	public void setName(String name) {
 		this.name = name;
+	}
+	public String getCode() {
+		return code;
+	}
+	public void setCode(String code) {
+		this.code = code;
 	}
 	public Bounds getBounds() {
 		return bounds;
@@ -33,8 +30,13 @@ public class Country {
 	public void setBounds(Bounds bounds) {
 		this.bounds = bounds;
 	}
+	
 	@Override
 	public String toString() {
-		return name;
+		if(code == null) {
+			return name;
+		} else {
+			return name + " (" + code + ")";
+		}
 	}
 }

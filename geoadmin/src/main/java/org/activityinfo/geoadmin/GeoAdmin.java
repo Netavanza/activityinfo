@@ -1,33 +1,44 @@
 package org.activityinfo.geoadmin;
 
 import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.util.List;
+import java.util.Map;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
 
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
-import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.ws.rs.core.MediaType;
+import javax.swing.tree.TreePath;
 
 import org.activityinfo.geoadmin.model.Country;
-import org.activityinfo.geoadmin.tree.CountryTreeListener;
 
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.WebResource;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 public class GeoAdmin extends JFrame {
 
+	private static final String OPEN_TABS = "open_tabs";
+	private static final String ACTIVE_TAB = "active_tab";
+	
 	private GeoClient client = new GeoClient();
+	private JTabbedPane tabPane;
+	
+	private List<Country> countries;
+	
+	private List<CountryTab> countryTabs = Lists.newArrayList();
+	private Map<Integer, CountryTab> countryMap = Maps.newHashMap();
+
+
+	private Preferences prefs = Preferences.userNodeForPackage(GeoAdmin.class);
 	
 	public GeoAdmin() {
 		setTitle("ActivityInfo Geo Administrator");
@@ -35,64 +46,106 @@ public class GeoAdmin extends JFrame {
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 
-		initMenu();
+		tabPane = new JTabbedPane();
+
+		getContentPane().add(tabPane, BorderLayout.CENTER);
+		
+		this.countries = client.getCountries();
+		
 		createTree();
-
-	}
-
-	private void initMenu() {
-
-		JMenuBar menubar = new JMenuBar();
-
-		JMenu importMenu = new JMenu("Import");
-
-		JMenuItem importLevel = new JMenuItem("Import new Admin Level");
-		importLevel.addActionListener(new ActionListener() {
+		
+		loadOpenTabs();
+		loadActiveTab();
+		
+		tabPane.addChangeListener(new ChangeListener() {
+			
 			@Override
-			public void actionPerformed(ActionEvent event) {
-				chooseFile();
+			public void stateChanged(ChangeEvent e) {
+				saveActiveTab();
 			}
-
 		});
-
-		importMenu.add(importLevel);
-
-		menubar.add(importMenu);
-
-		setJMenuBar(menubar);
 	}
 
-	private void chooseFile() {
-		JFileChooser chooser = new JFileChooser();
-		chooser.setFileFilter(new FileNameExtensionFilter("Shapefiles", ".shp"));
-		int returnVal = chooser.showOpenDialog(this);
-		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			System.out.println("You chose to open this file: "
-					+ chooser.getSelectedFile().getName());
+
+	private void saveActiveTab() {
+		prefs.put(ACTIVE_TAB, tabPane.getTitleAt(tabPane.getSelectedIndex()));
+		flushPrefs();
+	}
+	
+	private void loadActiveTab() {
+		String activeTab = prefs.get(ACTIVE_TAB, "");
+		for(int i=0;i!=tabPane.getTabCount();++i) {
+			if(tabPane.getTitleAt(i).equals(activeTab)) {
+				tabPane.setSelectedComponent(tabPane.getComponentAt(i));
+				return;
+			}
+		}
+	}
+
+	private void loadOpenTabs() {
+		String[] openIds = prefs.get(OPEN_TABS, "").split(",");
+		for(String openId : openIds) {
+			int countryId = Integer.parseInt(openId);
+			for(Country country : countries) {
+				if(country.getId() == countryId) {
+					showCountryWindow(country);
+				}
+			}
 		}
 	}
 
 	private void createTree() {
 		DefaultMutableTreeNode node = new DefaultMutableTreeNode("Countries");
 
-		for(Country country : client.getCountries()) {
-			DefaultMutableTreeNode countryNode = new DefaultMutableTreeNode(country);
-			countryNode.add(new DefaultMutableTreeNode("Loading..."));
-			node.add(countryNode);
+		for(Country country : countries) {
+			node.add( new DefaultMutableTreeNode(country));
 		}
 		
-		JTree tree = new JTree(node);
-		tree.addTreeWillExpandListener(new CountryTreeListener(client));
+		final JTree tree = new JTree(node);
 		tree.addMouseListener(new MouseAdapter() {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				if(e.i)
+				if(e.getClickCount() == 2) {
+					TreePath selPath = tree.getPathForLocation(e.getX(), e.getY());
+					if(selPath != null) {
+						DefaultMutableTreeNode node = (DefaultMutableTreeNode) selPath.getLastPathComponent();
+						Country country = (Country) node.getUserObject();
+						showCountryWindow(country);
+					}
+				}
 			}
-			
 		});
-		getContentPane().add(new JScrollPane(tree), BorderLayout.CENTER);
+		
+		tabPane.addTab("Countries", new JScrollPane(tree));
+	}
 
+	protected void showCountryWindow(Country country) {
+		if(countryMap.containsKey(country)) {
+			tabPane.setSelectedComponent(countryMap.get(country.getId()));
+		} else {
+			CountryTab tab = new CountryTab(client, country);
+			tabPane.addTab(country.getName(), tab);
+			tabPane.setSelectedComponent(tab);
+			countryMap.put(country.getId(), tab);
+			countryTabs.add(tab);
+			saveOpenTabs();
+		}	
+	}
+
+
+	private void saveOpenTabs() {
+		prefs.put(OPEN_TABS, Joiner.on(",").join(countryMap.keySet()));
+		flushPrefs();
+	}
+
+
+	private void flushPrefs()  {
+		try {
+			prefs.flush();
+		} catch (BackingStoreException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public static void main(String[] args) {

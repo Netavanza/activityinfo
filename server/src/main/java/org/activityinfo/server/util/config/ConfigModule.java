@@ -74,7 +74,9 @@ public class ConfigModule extends ServletModule {
         tryToLoadFrom(properties, systemSettings());
         tryToLoadFrom(properties, userSettings());
         tryToLoadFromS3(properties);
-        tryToLoadFromAppEngineDatastore(properties);
+        if(DeploymentEnvironment.isAppEngine()) {
+            tryToLoadFromAppEngineDatastore(properties);
+        }
         tryToLoadFrom(properties, versionSpecific(context));
 
         // specified at server start up with

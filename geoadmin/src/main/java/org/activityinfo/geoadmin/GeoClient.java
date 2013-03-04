@@ -8,6 +8,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 
 import org.activityinfo.geoadmin.model.AdminLevel;
+import org.activityinfo.geoadmin.model.AdminUnit;
 import org.activityinfo.geoadmin.model.Country;
 
 import com.sun.jersey.api.client.Client;
@@ -43,5 +44,16 @@ public class GeoClient {
 				.accept(MediaType.APPLICATION_JSON_TYPE)
 				.get(AdminLevel[].class));
 		
+	}
+	
+	public List<AdminUnit> getAdminEntities(AdminLevel level) {
+		return Arrays.asList(
+				client.resource(UriBuilder.fromUri(root)
+						.path("adminUnitLevel")
+						.path(Integer.toString(level.getId()))
+						.path("units")
+						.build())
+				.accept(MediaType.APPLICATION_JSON_TYPE)
+				.get(AdminUnit[].class));
 	}
 }

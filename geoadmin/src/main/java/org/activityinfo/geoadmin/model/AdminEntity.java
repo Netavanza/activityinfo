@@ -7,6 +7,7 @@ public class AdminEntity {
     private String code;
     private Bounds bounds;
     private boolean deleted;
+    private String geometryText;
 
     public int getId() {
         return id;
@@ -47,8 +48,20 @@ public class AdminEntity {
     public void setParentId(Integer parentId) {
         this.parentId = parentId;
     }
+    
+    /**
+     * 
+     * @return the entity's geometry as Well Known Text (WKT)
+     */
+    public String getGeometryText() {
+		return geometryText;
+	}
 
-    public boolean isDeleted() {
+	public void setGeometryText(String geometryText) {
+		this.geometryText = geometryText;
+	}
+
+	public boolean isDeleted() {
         return deleted;
     }
 

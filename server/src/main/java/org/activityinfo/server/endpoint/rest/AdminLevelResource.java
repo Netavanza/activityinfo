@@ -59,6 +59,8 @@ import com.google.common.io.ByteStreams;
 import com.sun.jersey.api.NotFoundException;
 import com.sun.jersey.api.core.InjectParam;
 import com.sun.jersey.api.view.Viewable;
+import com.vividsolutions.jts.io.ParseException;
+import com.vividsolutions.jts.io.WKTReader;
 
 public class AdminLevelResource {
 
@@ -209,7 +211,7 @@ public class AdminLevelResource {
     @Path("/childLevels")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response postNewLevel(@InjectParam AuthenticatedUser user,
-        NewAdminLevel newLevel) {
+        NewAdminLevel newLevel) throws ParseException {
 
         assertAuthorized(user);
 
@@ -223,6 +225,8 @@ public class AdminLevelResource {
         child.setParent(level);
         em.persist(child);
 
+        WKTReader reader = new WKTReader();
+        
         for (NewAdminEntity entity : newLevel.getEntities()) {
             AdminEntity childEntity = new AdminEntity();
             childEntity.setName(entity.getName());
@@ -231,6 +235,9 @@ public class AdminLevelResource {
             childEntity.setBounds(entity.getBounds());
             childEntity.setParent(em.getReference(AdminEntity.class,
                 entity.getParentId()));
+            if(entity.getGeometryText() != null) {
+                childEntity.setGeometry(reader.read(entity.getGeometryText()));
+            }
             child.getEntities().add(childEntity);
             em.persist(childEntity);
         }

@@ -34,6 +34,7 @@ import org.jdesktop.swingx.JXTreeTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.io.WKTWriter;
 
 /**
  * Window proving a user interface to match a shapefile to an existing admin
@@ -224,7 +225,8 @@ public class UpdateWindow extends JFrame {
     private void update() {
 
         List<AdminEntity> entities = Lists.newArrayList();
-
+        Map<Integer, String> geometryText = loadGeometry();
+        	
         for (MergeNode join : getLeaves()) {
             if (join.getAction() != null && join.getAction() != MergeAction.IGNORE) {
                 AdminEntity unit = new AdminEntity();
@@ -237,6 +239,8 @@ public class UpdateWindow extends JFrame {
                         unit.setCode(join.getFeature().getAttributeStringValue(form.getCodeProperty()));
                     }
                     unit.setBounds(GeoUtils.toBounds(join.getFeature().getEnvelope()));
+                    unit.setGeometryText(geometryText.get(join.getFeature().getIndex()));
+                
                 }
                 unit.setDeleted(join.getAction() == MergeAction.DELETE);
                 entities.add(unit);
@@ -263,7 +267,20 @@ public class UpdateWindow extends JFrame {
         client.updateAdminLevel(updatedLevel);
     }
 
-    private List<MergeNode> getLeaves() {
+    private Map<Integer, String> loadGeometry() {
+    	
+    	WKTWriter writer = new WKTWriter();
+    	
+		Map<Integer, String> map = Maps.newHashMap();
+		int featureIndex = 0;
+		for (Geometry geometry : source.getGeometery()) {
+			map.put(featureIndex, writer.write(geometry));
+		}
+		
+		return map;
+	}
+
+	private List<MergeNode> getLeaves() {
         List<MergeNode> nodes = ((MergeNode) treeModel.getRoot()).getLeaves();
         return nodes;
     }

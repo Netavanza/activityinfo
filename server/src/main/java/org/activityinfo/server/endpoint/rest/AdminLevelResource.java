@@ -70,6 +70,9 @@ public class AdminLevelResource {
     private Provider<EntityManager> entityManager;
     private AdminLevel level;
     private BlobService blobService;
+    
+    private WKTReader reader = new WKTReader();
+
 
     // TODO: create list of geoadmins per country
     private static final int SUPER_USER_ID = 3;
@@ -112,7 +115,7 @@ public class AdminLevelResource {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     public Response update(@InjectParam AuthenticatedUser user,
-        UpdatedAdminLevel updatedLevel) {
+        UpdatedAdminLevel updatedLevel) throws ParseException {
 
         assertAuthorized(user);
 
@@ -129,29 +132,38 @@ public class AdminLevelResource {
 
         if (updatedLevel.getEntities() != null) {
             for (UpdatedAdminEntity updatedEntity : updatedLevel.getEntities()) {
-                AdminEntity entity;
-                if (updatedEntity.getId() != null && updatedEntity.getId() > 0) {
-                    // update existing entity
-                    entity = em.find(AdminEntity.class, updatedEntity.getId());
-                    if (updatedEntity.isDeleted()) {
-                        entity.setDeleted(true);
-                    } else {
-                        entity.setName(updatedEntity.getName());
-                        entity.setCode(updatedEntity.getCode());
-                        entity.setBounds(updatedEntity.getBounds());
-                    }
-                } else {
+                if(updatedEntity.isDeleted()) {
+                    // mark the entity as deleted. we can't remove it from
+                    // the database because we may have locations which refer to it
+                    // on distant clients
+                    em.find(AdminEntity.class, updatedEntity.getId())
+                        .setDeleted(true);
+   
+                } else if(updatedEntity.isNew()) {
                     // create new entity
-                    entity = new AdminEntity();
+                    AdminEntity entity = new AdminEntity();
                     entity.setLevel(level);
-                    entity.setName(updatedEntity.getName());
-                    entity.setCode(updatedEntity.getCode());
-                    entity.setBounds(updatedEntity.getBounds());
                     if (updatedEntity.getParentId() != null) {
                         entity.setParent(em.getReference(AdminEntity.class, updatedEntity.getParentId()));
                     }
-                    entity.setDeleted(updatedEntity.isDeleted());
+                    entity.setName(updatedEntity.getName());
+                    entity.setCode(updatedEntity.getCode());
+                    entity.setBounds(updatedEntity.getBounds());
+                    if(updatedEntity.getGeometryText() != null) {
+                        entity.setGeometry(reader.read(updatedEntity.getGeometryText()));
+                    }
                     em.persist(entity);
+                    
+                } else {
+                    // update existing entity
+                    // TODO: bound locations that share this name?
+                    AdminEntity entity = em.find(AdminEntity.class, updatedEntity.getId());
+                    entity.setName(updatedEntity.getName());
+                    entity.setCode(updatedEntity.getCode());
+                    entity.setBounds(updatedEntity.getBounds());
+                    if(updatedEntity.getGeometryText() != null) {
+                        entity.setGeometry(reader.read(updatedEntity.getGeometryText()));
+                    }
                 }
             }
         }
@@ -206,6 +218,11 @@ public class AdminLevelResource {
 
         blobService.put(wkbKey(), ByteStreams.newInputStreamSupplier(wkb));
     }
+    
+
+    private String wkbKey() {
+        return "/adminGeometry/" + level.getId() + ".wkb.gz";
+    }
 
     @POST
     @Path("/childLevels")
@@ -224,8 +241,6 @@ public class AdminLevelResource {
         child.setName(newLevel.getName());
         child.setParent(level);
         em.persist(child);
-
-        WKTReader reader = new WKTReader();
         
         for (NewAdminEntity entity : newLevel.getEntities()) {
             AdminEntity childEntity = new AdminEntity();
@@ -253,8 +268,6 @@ public class AdminLevelResource {
 
         return Response.ok().build();
     }
-
-    private String wkbKey() {
-        return "/adminGeometry/" + level.getId() + ".wkb.gz";
-    }
+    
+    
 }

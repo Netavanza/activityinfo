@@ -9,12 +9,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.activityinfo.client.i18n.I18N;
-import org.activityinfo.server.digest.DigestDateUtil;
 import org.activityinfo.server.digest.DigestModel;
 import org.activityinfo.server.digest.DigestRenderer;
 import org.activityinfo.server.digest.activity.ActivityDigestModel.ActivityMap;
 import org.activityinfo.server.digest.activity.ActivityDigestModel.DatabaseModel;
 import org.activityinfo.server.digest.activity.ActivityDigestModel.PartnerActivityModel;
+import org.activityinfo.server.util.date.DateCalc;
 
 public class ActivityDigestRenderer implements DigestRenderer {
     private static final int HEADERCELL_WIDTH = 230;
@@ -188,7 +188,7 @@ public class ActivityDigestRenderer implements DigestRenderer {
     private String determineTitle(DatabaseModel databaseModel, int updates, int dayIndex) {
         Date today = databaseModel.getModel().getDate();
         int totalDays = databaseModel.getModel().getDays();
-        Date date = DigestDateUtil.daysAgo(today, (totalDays - dayIndex - 1));
+        Date date = DateCalc.daysAgo(today, (totalDays - dayIndex - 1));
         return I18N.MESSAGES.activityDigestGraphTooltip(updates, date);
     }
     

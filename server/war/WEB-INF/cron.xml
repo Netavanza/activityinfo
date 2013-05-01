@@ -18,4 +18,10 @@
     <schedule>every day 17:00</schedule>  
   </cron>
 
+  <cron>
+    <url>/admin/appstats/persist</url>
+    <description>Weekly application statistics</description>
+    <schedule>every saturday 23:00</schedule>  
+  </cron>
+  
 </cronentries>

@@ -1,9 +1,9 @@
-package org.activityinfo.server.digest;
+package org.activityinfo.server.util.date;
 
 import java.util.Calendar;
 import java.util.Date;
 
-public class DigestDateUtil {
+public class DateCalc {
 
     public static boolean isOnToday(Date date, Date compare) {
         return isOnToday(date, compare.getTime());

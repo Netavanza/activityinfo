@@ -130,5 +130,4 @@ public class RootResource {
     public SitesResources getSites() {
         return new SitesResources(dispatcher);
     }
-
 }

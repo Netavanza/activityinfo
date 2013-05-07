@@ -54,6 +54,7 @@ import org.activityinfo.server.endpoint.rest.model.VersionMetadata;
 import org.activityinfo.server.util.blob.BlobNotFoundException;
 import org.activityinfo.server.util.blob.BlobService;
 import org.activityinfo.shared.auth.AuthenticatedUser;
+import org.codehaus.jackson.JsonGenerationException;
 
 import com.google.common.io.ByteStreams;
 import com.sun.jersey.api.NotFoundException;
@@ -111,6 +112,28 @@ public class AdminLevelResource {
             .setParameter("level", level)
             .getResultList();
     }
+    
+    @GET
+    @Path("/entities/features")
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<AdminEntity> getEntityFeatures(@InjectParam EntityManager em) {
+        return em.createQuery("select e  from AdminEntity e where e.deleted = false and e.level = :level")
+            .setParameter("level", level)
+            .getResultList();
+    }
+    
+    @GET
+    @Path("/entities/polylines")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getEntityPolylines(@InjectParam EntityManager em) throws JsonGenerationException, IOException {
+        
+        List<AdminEntity> entities = em.createQuery("select e  from AdminEntity e where e.deleted = false and e.level = :level")
+            .setParameter("level", level)
+            .getResultList();
+        
+        GoogleMapsWriter writer = new GoogleMapsWriter();
+        return writer.write(entities);
+    }        
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
@@ -268,6 +291,4 @@ public class AdminLevelResource {
 
         return Response.ok().build();
     }
-    
-    
 }

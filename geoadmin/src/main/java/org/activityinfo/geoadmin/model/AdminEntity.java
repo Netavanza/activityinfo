@@ -1,5 +1,7 @@
 package org.activityinfo.geoadmin.model;
 
+import com.vividsolutions.jts.geom.Geometry;
+
 public class AdminEntity {
     private int id;
     private Integer parentId;
@@ -7,7 +9,7 @@ public class AdminEntity {
     private String code;
     private Bounds bounds;
     private boolean deleted;
-    private String geometryText;
+    private Geometry geometry;
 
     public int getId() {
         return id;
@@ -49,19 +51,15 @@ public class AdminEntity {
         this.parentId = parentId;
     }
     
-    /**
-     * 
-     * @return the entity's geometry as Well Known Text (WKT)
-     */
-    public String getGeometryText() {
-		return geometryText;
-	}
+    public Geometry getGeometry() {
+        return geometry;
+    }
 
-	public void setGeometryText(String geometryText) {
-		this.geometryText = geometryText;
-	}
+    public void setGeometry(Geometry geometry) {
+        this.geometry = geometry;
+    }
 
-	public boolean isDeleted() {
+    public boolean isDeleted() {
         return deleted;
     }
 

@@ -22,7 +22,9 @@ package org.activityinfo.server.endpoint.rest;
  * #L%
  */
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
@@ -54,12 +56,20 @@ import org.activityinfo.server.endpoint.rest.model.VersionMetadata;
 import org.activityinfo.server.util.blob.BlobNotFoundException;
 import org.activityinfo.server.util.blob.BlobService;
 import org.activityinfo.shared.auth.AuthenticatedUser;
+import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.util.DefaultPrettyPrinter;
 
+import com.bedatadriven.geojson.GeometrySerializer;
+import com.google.common.base.Charsets;
 import com.google.common.io.ByteStreams;
 import com.sun.jersey.api.NotFoundException;
 import com.sun.jersey.api.core.InjectParam;
 import com.sun.jersey.api.view.Viewable;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
 
@@ -114,15 +124,6 @@ public class AdminLevelResource {
     }
     
     @GET
-    @Path("/entities/features")
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<AdminEntity> getEntityFeatures(@InjectParam EntityManager em) {
-        return em.createQuery("select e  from AdminEntity e where e.deleted = false and e.level = :level")
-            .setParameter("level", level)
-            .getResultList();
-    }
-    
-    @GET
     @Path("/entities/polylines")
     @Produces(MediaType.APPLICATION_JSON)
     public String getEntityPolylines(@InjectParam EntityManager em) throws JsonGenerationException, IOException {
@@ -133,7 +134,50 @@ public class AdminLevelResource {
         
         GoogleMapsWriter writer = new GoogleMapsWriter();
         return writer.write(entities);
-    }        
+    }
+    
+    @GET
+    @Path("/entities/features")
+    public Response getFeatures(@InjectParam EntityManager em) throws IOException {
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        OutputStreamWriter writer = new OutputStreamWriter(
+            baos, Charsets.UTF_8);
+
+        List<AdminEntity> entities = em
+            .createQuery("select e  from AdminEntity e where e.deleted = false and e.level = :level")
+            .setParameter("level", level)
+            .getResultList();
+
+        JsonFactory jfactory = new JsonFactory();
+        JsonGenerator json = jfactory.createJsonGenerator(writer);
+        DefaultPrettyPrinter prettyPrinter = new DefaultPrettyPrinter();
+        json.setPrettyPrinter(prettyPrinter);
+        json.writeStartArray();
+        GeometrySerializer geometrySerializer = new GeometrySerializer();
+
+        for (AdminEntity entity : entities) {
+
+            json.writeStartObject();
+            json.writeStringField("type", "Feature");
+            json.writeNumberField("id", entity.getId());
+            json.writeObjectFieldStart("properties");
+            json.writeStringField("name", entity.getName());
+            json.writeEndObject();
+
+            json.writeFieldName("geometry");
+            geometrySerializer.writeGeometry(json, entity.getGeometry());
+            json.writeEndObject();
+        }
+
+        json.writeEndArray();
+        json.close();
+
+        return Response.ok()
+            .entity(baos.toByteArray())
+            .type(MediaType.APPLICATION_JSON)
+            .build();
+    }
 
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
@@ -155,6 +199,16 @@ public class AdminLevelResource {
 
         if (updatedLevel.getEntities() != null) {
             for (UpdatedAdminEntity updatedEntity : updatedLevel.getEntities()) {
+
+                // check geometry
+                if (updatedEntity.getGeometry() != null && !isValid(updatedEntity.getGeometry())) {
+                    throw new WebApplicationException(
+                        Response
+                        .status(Status.BAD_REQUEST)         
+                            .entity("Geometry must be Polygon or MultiPolygon")
+                            .build());
+                }
+
                 if(updatedEntity.isDeleted()) {
                     // mark the entity as deleted. we can't remove it from
                     // the database because we may have locations which refer to it
@@ -172,9 +226,7 @@ public class AdminLevelResource {
                     entity.setName(updatedEntity.getName());
                     entity.setCode(updatedEntity.getCode());
                     entity.setBounds(updatedEntity.getBounds());
-                    if(updatedEntity.getGeometryText() != null) {
-                        entity.setGeometry(reader.read(updatedEntity.getGeometryText()));
-                    }
+                    entity.setGeometry(updatedEntity.getGeometry());
                     em.persist(entity);
                     
                 } else {
@@ -184,9 +236,7 @@ public class AdminLevelResource {
                     entity.setName(updatedEntity.getName());
                     entity.setCode(updatedEntity.getCode());
                     entity.setBounds(updatedEntity.getBounds());
-                    if(updatedEntity.getGeometryText() != null) {
-                        entity.setGeometry(reader.read(updatedEntity.getGeometryText()));
-                    }
+                    entity.setGeometry(updatedEntity.getGeometry());
                 }
             }
         }
@@ -214,6 +264,10 @@ public class AdminLevelResource {
         em.getTransaction().commit();
 
         return Response.ok().build();
+    }
+
+    private boolean isValid(Geometry geometry) {
+        return geometry instanceof Polygon || geometry instanceof MultiPolygon;
     }
 
     @GET

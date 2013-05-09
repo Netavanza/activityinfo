@@ -346,6 +346,11 @@
       <artifactId>jersey-json</artifactId>
       <version>${jersey.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.bedatadriven</groupId>
+      <artifactId>jackson-geojson</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 
   <repositories>

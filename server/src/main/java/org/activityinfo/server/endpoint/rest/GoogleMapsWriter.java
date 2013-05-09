@@ -1,6 +1,5 @@
 package org.activityinfo.server.endpoint.rest;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.List;
@@ -38,7 +37,7 @@ public class GoogleMapsWriter  {
         }
         
         writer.writeEndArray();
-        writer.writeEndArray();
+        writer.writeEndObject();
         return stringWriter.toString();
     }
 

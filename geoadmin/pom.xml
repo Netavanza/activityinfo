@@ -28,6 +28,17 @@
       <version>1.17</version>
     </dependency>
     <dependency>
+      <groupId>com.bedatadriven</groupId>
+      <artifactId>jackson-geojson</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+      <exclusions>
+        <exclusion>
+          <groupId>xerces</groupId>
+          <artifactId>xercesImpl</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
       <version>13.0.1</version>
@@ -63,6 +74,7 @@
       <artifactId>commons-lang3</artifactId>
       <version>3.1</version>
     </dependency>
+    
   </dependencies>
 
   <repositories>

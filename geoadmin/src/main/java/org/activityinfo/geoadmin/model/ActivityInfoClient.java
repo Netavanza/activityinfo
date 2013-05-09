@@ -6,7 +6,11 @@ import java.util.List;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
+import javax.ws.rs.ext.ContextResolver;
 
+import org.codehaus.jackson.map.ObjectMapper;
+
+import com.bedatadriven.geojson.GeoJsonModule;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
@@ -19,6 +23,17 @@ import com.sun.jersey.api.json.JSONConfiguration;
 public class ActivityInfoClient {
     private Client client;
     private URI root;
+
+    public static class ObjectMapperProvider implements ContextResolver<ObjectMapper> {
+
+        @Override
+        public ObjectMapper getContext(Class<?> type) {
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.registerModule(new GeoJsonModule());
+            return mapper;
+        }
+
+    }
 
     /**
      * Creates a new instance using the given endpoint, ActivityInfo username
@@ -35,6 +50,8 @@ public class ActivityInfoClient {
     public ActivityInfoClient(String endpoint, String username, String password) {
         ClientConfig clientConfig = new DefaultClientConfig();
         clientConfig.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE);
+        clientConfig.getClasses().add(ObjectMapperProvider.class);
+
         client = Client.create(clientConfig);
         client.addFilter(new HTTPBasicAuthFilter(username, password));
 

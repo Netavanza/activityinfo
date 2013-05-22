@@ -71,10 +71,13 @@ public class ImportSource {
         attributes = getNonGeometryAttributes();
         FeatureCollection features = featureSource.getFeatures();
         FeatureIterator it = features.features();
+        int index = 0;
         while (it.hasNext()) {
             SimpleFeature feature = (SimpleFeature) it.next();
             ImportFeature importFeature = new ImportFeature(
-                attributes, toAttributeArray(feature), calcWgs84Envelope(feature));
+                attributes,
+                toAttributeArray(feature),
+                calcWgs84Geometry(feature));
             this.features.add(importFeature);
         }
     }
@@ -83,12 +86,11 @@ public class ImportSource {
      * Calculates the geographic envelope of the feature in the WGS 84
      * Geographic Reference system.
      */
-    private Envelope calcWgs84Envelope(SimpleFeature feature) {
+    private Geometry calcWgs84Geometry(SimpleFeature feature) {
         try {
             Geometry geometry = (Geometry) feature.getDefaultGeometryProperty().getValue();
             Geometry geometryInWgs84 = JTS.transform(geometry, transform);
-            Envelope envelope = geometryInWgs84.getEnvelopeInternal();
-            return envelope;
+            return geometryInWgs84;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

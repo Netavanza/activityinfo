@@ -37,6 +37,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
@@ -53,18 +54,16 @@ import org.activityinfo.server.endpoint.rest.model.NewAdminLevel;
 import org.activityinfo.server.endpoint.rest.model.UpdatedAdminEntity;
 import org.activityinfo.server.endpoint.rest.model.UpdatedAdminLevel;
 import org.activityinfo.server.endpoint.rest.model.VersionMetadata;
-import org.activityinfo.server.util.blob.BlobNotFoundException;
 import org.activityinfo.server.util.blob.BlobService;
 import org.activityinfo.shared.auth.AuthenticatedUser;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.util.DefaultPrettyPrinter;
+import org.hibernate.Session;
 
 import com.bedatadriven.geojson.GeometrySerializer;
 import com.google.common.base.Charsets;
-import com.google.common.io.ByteStreams;
-import com.sun.jersey.api.NotFoundException;
 import com.sun.jersey.api.core.InjectParam;
 import com.sun.jersey.api.view.Viewable;
 import com.vividsolutions.jts.geom.Geometry;
@@ -179,6 +178,18 @@ public class AdminLevelResource {
             .build();
     }
 
+    @GET
+    @Path("/tiles/{z}/{x}/{y}.png")
+    public Response tile(@InjectParam Session session,
+        @PathParam("z") int zoom, @PathParam("x") int x, @PathParam("y") int y) throws IOException {
+
+        AdminTileRenderer renderer = new AdminTileRenderer(session, level);
+        byte[] image = renderer.render(zoom, x, y);
+
+        return Response.ok(image).type("image/png").tag("version=" + level.getVersion()).build();
+
+    }
+
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     public Response update(@InjectParam AuthenticatedUser user,
@@ -267,37 +278,6 @@ public class AdminLevelResource {
 
     private boolean isValid(Geometry geometry) {
         return geometry instanceof Polygon || geometry instanceof MultiPolygon;
-    }
-
-    @GET
-    @Path("/geometry/wkb")
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    public Response getWkbGeometry() throws IOException {
-        try {
-            LOGGER.info("Get");
-
-            return Response
-                .ok(ByteStreams.toByteArray(blobService.get(wkbKey())))
-                .build();
-
-        } catch (BlobNotFoundException e) {
-            throw new NotFoundException();
-        }
-    }
-
-    @PUT
-    @Path("/geometry/wkb")
-    @Consumes(MediaType.APPLICATION_OCTET_STREAM)
-    public void putWkbGeometry(@InjectParam AuthenticatedUser user, byte[] wkb)
-        throws IOException {
-        assertAuthorized(user);
-
-        blobService.put(wkbKey(), ByteStreams.newInputStreamSupplier(wkb));
-    }
-    
-
-    private String wkbKey() {
-        return "/adminGeometry/" + level.getId() + ".wkb.gz";
     }
 
     @POST

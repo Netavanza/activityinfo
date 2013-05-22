@@ -28,6 +28,7 @@ import javax.swing.tree.TreePath;
 import org.activityinfo.geoadmin.model.ActivityInfoClient;
 import org.activityinfo.geoadmin.model.AdminLevel;
 import org.activityinfo.geoadmin.model.Country;
+import org.activityinfo.geoadmin.model.VersionMetadata;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
@@ -166,9 +167,21 @@ public class CountryTab extends JPanel {
     private void renameLevel(AdminLevel level) {
         String newName = JOptionPane.showInputDialog(getParentFrame(), "New name");
         if (!Strings.isNullOrEmpty(newName)) {
+
+            AdminLevel update = new AdminLevel();
+            update.setId(level.getId());
+            update.setName(newName);
+            update.setParentId(level.getParentId());
+
+            VersionMetadata metadata = new VersionMetadata();
+            metadata.setMessage(String.format("Renamed level from '%s' to '%s'",
+                level.getName(), newName));
+            update.setVersionMetadata(metadata);
+
+            client.updateAdminLevel(update);
+
             level.setName(newName);
 
-            client.updateAdminLevel(level);
         }
     }
 

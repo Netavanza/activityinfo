@@ -5,7 +5,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
@@ -28,12 +27,9 @@ import org.activityinfo.geoadmin.model.ActivityInfoClient;
 import org.activityinfo.geoadmin.model.AdminEntity;
 import org.activityinfo.geoadmin.model.AdminLevel;
 import org.activityinfo.geoadmin.model.VersionMetadata;
-import org.activityinfo.geoadmin.writer.FileSetWriter;
 import org.jdesktop.swingx.JXTreeTable;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * Window proving a user interface to match a shapefile to an existing admin
@@ -224,7 +220,6 @@ public class UpdateWindow extends JFrame {
     private void update() {
 
         List<AdminEntity> entities = Lists.newArrayList();
-        Map<Integer, Geometry> geometries = loadGeometry();
         	
         for (MergeNode join : getLeaves()) {
             if (join.getAction() != null && join.getAction() != MergeAction.IGNORE) {
@@ -238,7 +233,7 @@ public class UpdateWindow extends JFrame {
                         unit.setCode(join.getFeature().getAttributeStringValue(form.getCodeProperty()));
                     }
                     unit.setBounds(GeoUtils.toBounds(join.getFeature().getEnvelope()));
-                    unit.setGeometry(geometries.get(join.getFeature().getIndex()));
+                    unit.setGeometry(join.getFeature().getGeometry());
 
                 }
                 unit.setDeleted(join.getAction() == MergeAction.DELETE);
@@ -250,6 +245,7 @@ public class UpdateWindow extends JFrame {
         metadata.setSourceFilename(source.getFile().getName());
         metadata.setSourceMD5(source.getMd5Hash());
         metadata.setSourceUrl(form.getSourceUrl());
+        metadata.setMessage(form.getMessage());
         try {
             metadata.setSourceMetadata(source.getMetadata());
         } catch (IOException e) {
@@ -266,39 +262,9 @@ public class UpdateWindow extends JFrame {
         client.updateAdminLevel(updatedLevel);
     }
 
-    private Map<Integer, Geometry> loadGeometry() {
-
-        Map<Integer, Geometry> map = Maps.newHashMap();
-		int featureIndex = 0;
-		for (Geometry geometry : source.getGeometery()) {
-            map.put(featureIndex, geometry);
-		}
-		
-		return map;
-	}
-
 	private List<MergeNode> getLeaves() {
         List<MergeNode> nodes = ((MergeNode) treeModel.getRoot()).getLeaves();
         return nodes;
     }
 
-    private void writeGeometry() throws IOException {
-        Map<Integer, Integer> idMap = featureIndexToIdMap();
-        FileSetWriter fileSetWriter = new FileSetWriter(level.getId());
-        fileSetWriter.start(source.getFeatureSource().getFeatures());
-
-        int featureIndex = 0;
-        for (Geometry geometry : source.getGeometery()) {
-            fileSetWriter.write(idMap.get(featureIndex), geometry);
-        }
-        fileSetWriter.close();
-    }
-
-    private Map<Integer, Integer> featureIndexToIdMap() {
-        Map<Integer, Integer> map = Maps.newHashMap();
-        for (Join join : joins) {
-            map.put(join.getFeature().getIndex(), join.getEntity().getId());
-        }
-        return map;
-    }
 }

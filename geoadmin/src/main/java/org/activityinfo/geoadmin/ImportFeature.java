@@ -5,23 +5,23 @@ import java.util.List;
 import org.opengis.feature.type.PropertyDescriptor;
 
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
 
 public class ImportFeature {
     private ImportSource source;
-    private int index;
     private Object[] attributeValues;
     private Envelope envelope;
     private List<PropertyDescriptor> attributes;
+    private Geometry geometry;
 
-    public ImportFeature(ImportSource source, int index) {
-        this.source = source;
-        this.index = index;
-    }
 
-    public ImportFeature(List<PropertyDescriptor> attributes, Object[] attributeValues, Envelope envelope) {
+    public ImportFeature(List<PropertyDescriptor> attributes,
+        Object[] attributeValues,
+        Geometry geometry) {
         this.attributes = attributes;
         this.attributeValues = attributeValues;
-        this.envelope = envelope;
+        this.geometry = geometry;
+        this.envelope = geometry.getEnvelopeInternal();
     }
 
     public Envelope getEnvelope() {
@@ -32,8 +32,8 @@ public class ImportFeature {
         return getAttributeStringValue(attributes.indexOf(descriptor));
     }
 
-    public int getIndex() {
-        return index;
+    public Geometry getGeometry() {
+        return geometry;
     }
 
     public Object[] getAttributeValues() {
@@ -74,6 +74,4 @@ public class ImportFeature {
         }
         return sb.toString();
     }
-
-
 }

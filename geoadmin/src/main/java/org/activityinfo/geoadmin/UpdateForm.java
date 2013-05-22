@@ -83,4 +83,8 @@ public class UpdateForm extends JPanel {
     public String getSourceUrl() {
         return sourceUrlField.getText();
     }
+
+    public String getMessage() {
+        return messageTextArea.getText();
+    }
 }

@@ -50,7 +50,7 @@ public class AdminEntity {
     public void setParentId(Integer parentId) {
         this.parentId = parentId;
     }
-    
+
     public Geometry getGeometry() {
         return geometry;
     }
@@ -59,7 +59,7 @@ public class AdminEntity {
         this.geometry = geometry;
     }
 
-    public boolean isDeleted() {
+	public boolean isDeleted() {
         return deleted;
     }
 

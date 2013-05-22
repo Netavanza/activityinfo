@@ -208,7 +208,6 @@ public class AdminLevelResource {
                             .entity("Geometry must be Polygon or MultiPolygon")
                             .build());
                 }
-
                 if(updatedEntity.isDeleted()) {
                     // mark the entity as deleted. we can't remove it from
                     // the database because we may have locations which refer to it
@@ -345,4 +344,5 @@ public class AdminLevelResource {
 
         return Response.ok().build();
     }
+
 }

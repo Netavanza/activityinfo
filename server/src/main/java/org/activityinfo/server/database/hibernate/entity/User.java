@@ -26,9 +26,12 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;
@@ -53,15 +56,16 @@ public class User implements java.io.Serializable {
     private static final long serialVersionUID = 6486007767204653799L;
 
     private int id;
-    private String email;
-    private String firstName;
     private String name;
-    private boolean newUser;
+    private String email;
+    private String organization;
+    private String jobtitle;
     private String locale;
     private String changePasswordKey;
     private Date dateChangePasswordKeyIssued;
     private String hashedPassword;
     private boolean emailNotification;
+    private User invitedBy;
 
     public User() {
     }
@@ -95,24 +99,22 @@ public class User implements java.io.Serializable {
         this.name = name;
     }
 
-    @Deprecated
-    @Column(name = "FirstName", nullable = true, length = 50)
-    public String getFirstName() {
-        return firstName;
+    @Column(name = "Organization", nullable = true, length = 100)
+    public String getOrganization() {
+        return organization;
     }
 
-    @Deprecated
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+    public void setOrganization(String organization) {
+        this.organization = organization;
     }
 
-    @Column(name = "NewUser", nullable = false)
-    public boolean isNewUser() {
-        return this.newUser;
+    @Column(name = "Jobtitle", nullable = true, length = 100)
+    public String getJobtitle() {
+        return jobtitle;
     }
 
-    public void setNewUser(boolean newUser) {
-        this.newUser = newUser;
+    public void setJobtitle(String jobtitle) {
+        this.jobtitle = jobtitle;
     }
 
     @Column(name = "EmailNotification", nullable = false)
@@ -122,6 +124,16 @@ public class User implements java.io.Serializable {
 
     public void setEmailNotification(boolean emailNotification) {
         this.emailNotification = emailNotification;
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "invitedBy", nullable = true)
+    public User getInvitedBy() {
+        return invitedBy;
+    }
+
+    public void setInvitedBy(User invitedBy) {
+        this.invitedBy = invitedBy;
     }
 
     @Column(name = "Locale", nullable = false, length = 10)
@@ -183,11 +195,10 @@ public class User implements java.io.Serializable {
         this.setDateChangePasswordKeyIssued(null);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
+    public void changePassword(String newPlaintextPassword) {
+        this.hashedPassword = BCrypt.hashpw(newPlaintextPassword,
+            BCrypt.gensalt());
+    }
 
     @Override
     public boolean equals(Object other) {
@@ -201,12 +212,6 @@ public class User implements java.io.Serializable {
         return this.getEmail().equals(that.getEmail());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#hashCode()
-     */
-
     @Override
     public int hashCode() {
         return getEmail().hashCode();
@@ -214,143 +219,11 @@ public class User implements java.io.Serializable {
 
     @Override
     public String toString() {
-        if (firstName != null && name != null) {
-            return firstName + " " + name;
-        } else if (name != null) {
+        if (name != null) {
             return name;
         } else {
             return "user" + id;
         }
     }
 
-    /**
-     * Gets the formatted complete name of a user.
-     * <ul>
-     * <li>If the user has a first name and a last name, returns '<i>John
-     * Doe</i>'.</li>
-     * <li>If the user hasn't a first name and has a last name, returns
-     * '<i>Doe</i>'.</li>
-     * <li>If the user has neither a first name or a last name, returns an empty
-     * string.</li>
-     * </ul>
-     * 
-     * @param user
-     *            The user
-     * @return The complete name.
-     */
-    @Deprecated
-    public static String getUserCompleteName(final User user) {
-
-        final StringBuilder sb = new StringBuilder();
-        if (user.firstName != null) {
-            sb.append(user.firstName);
-            sb.append(' ');
-        }
-        if (user.name != null) {
-            sb.append(user.name);
-        }
-
-        return sb.toString();
-    }
-
-    /**
-     * Gets the formatted complete name of a user.
-     * <ul>
-     * <li>If the user has a first name and a last name, returns '<i>John
-     * Doe</i>'.</li>
-     * <li>If the user hasn't a first name and has a last name, returns
-     * '<i>Doe</i>'.</li>
-     * <li>If the user has neither a first name or a last name, returns an empty
-     * string.</li>
-     * </ul>
-     * 
-     * @param firstName
-     *            The user first name.
-     * @param lastName
-     *            The user last name.
-     * @return The complete name.
-     */
-    @Deprecated
-    public static String getUserCompleteName(final String firstName,
-        final String lastName) {
-
-        final StringBuilder sb = new StringBuilder();
-        if (firstName != null) {
-            sb.append(firstName);
-            sb.append(' ');
-        }
-        if (lastName != null) {
-            sb.append(lastName);
-        }
-
-        return sb.toString();
-    }
-
-    /**
-     * Gets the formatted short name of a user.
-     * <ul>
-     * <li>If the user has a first name and a last name, returns '<i>J.
-     * Doe</i>'.</li>
-     * <li>If the user hasn't a first name and has a last name, returns
-     * '<i>Doe</i>'.</li>
-     * <li>If the user has neither a first name or a last name, returns an empty
-     * string.</li>
-     * </ul>
-     * 
-     * @param user
-     *            The user
-     * @return The short name.
-     */
-    @Deprecated
-    public static String getUserShortName(final User user) {
-
-        final StringBuilder sb = new StringBuilder();
-        if (user.firstName != null) {
-            sb.append(user.firstName.charAt(0));
-            sb.append(". ");
-        }
-        if (user.name != null) {
-            sb.append(user.name);
-        }
-
-        return sb.toString();
-    }
-
-    /**
-     * Gets the formatted short name of a user.
-     * <ul>
-     * <li>If the user has a first name and a last name, returns '<i>J.
-     * Doe</i>'.</li>
-     * <li>If the user hasn't a first name and has a last name, returns
-     * '<i>Doe</i>'.</li>
-     * <li>If the user has neither a first name or a last name, returns an empty
-     * string.</li>
-     * </ul>
-     * 
-     * @param firstName
-     *            The user first name.
-     * @param lastName
-     *            The user last name.
-     * @return The short name.
-     */
-    @Deprecated
-    public static String getUserShortName(final String firstName,
-        final String lastName) {
-
-        final StringBuilder sb = new StringBuilder();
-        if (firstName != null) {
-            sb.append(firstName.charAt(0));
-            sb.append(". ");
-        }
-        if (lastName != null) {
-            sb.append(lastName);
-        }
-
-        return sb.toString();
-    }
-
-    public void changePassword(String newPlaintextPassword) {
-        this.hashedPassword = BCrypt.hashpw(newPlaintextPassword,
-            BCrypt.gensalt());
-    }
 }

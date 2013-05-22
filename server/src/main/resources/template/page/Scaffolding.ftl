@@ -24,7 +24,7 @@
 
 <html>
 <head>
-  <title>ActivityInfo - Login</title>
+  <title>${title}</title>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
   
   <!-- CSS Files -->
@@ -82,8 +82,7 @@
 </#macro>
 
 <#macro scripts>
-  <script src="http://code.jquery.com/jquery-latest.js"></script>
-  <script src="/js/bootstrap.min.js"></script>
+  <script src="/js/jquery-1.9.1.min.js"></script>
   <script>
 	 
   		$('.language').click(function() {

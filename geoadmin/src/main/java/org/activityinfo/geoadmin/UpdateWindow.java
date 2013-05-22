@@ -239,7 +239,7 @@ public class UpdateWindow extends JFrame {
                     }
                     unit.setBounds(GeoUtils.toBounds(join.getFeature().getEnvelope()));
                     unit.setGeometry(geometries.get(join.getFeature().getIndex()));
-                
+
                 }
                 unit.setDeleted(join.getAction() == MergeAction.DELETE);
                 entities.add(unit);

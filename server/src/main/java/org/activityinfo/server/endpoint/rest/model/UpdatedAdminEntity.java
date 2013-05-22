@@ -64,5 +64,4 @@ public class UpdatedAdminEntity {
     public void setGeometry(Geometry geometry) {
         this.geometry = geometry;
     }
-
 }

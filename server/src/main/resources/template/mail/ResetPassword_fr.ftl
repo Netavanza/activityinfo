@@ -27,6 +27,7 @@ Quelqu'un (probablement vous) a demandé pour réinitialiser votre mot de passe 
 http://www.activityinfo.org/changePassword?${user.changePasswordKey}
 
 Si vous n'avez pas demandé de réinitialiser votre mot de passe, vous pouvez ignorer ce message.
-Best regards,
+
+Cordialement,
 
 L'équipe ActivityInfo

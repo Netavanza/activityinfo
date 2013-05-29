@@ -54,7 +54,6 @@ import org.activityinfo.server.endpoint.rest.model.NewAdminLevel;
 import org.activityinfo.server.endpoint.rest.model.UpdatedAdminEntity;
 import org.activityinfo.server.endpoint.rest.model.UpdatedAdminLevel;
 import org.activityinfo.server.endpoint.rest.model.VersionMetadata;
-import org.activityinfo.server.util.blob.BlobService;
 import org.activityinfo.shared.auth.AuthenticatedUser;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerationException;
@@ -70,7 +69,6 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.io.ParseException;
-import com.vividsolutions.jts.io.WKTReader;
 
 public class AdminLevelResource {
 
@@ -79,19 +77,15 @@ public class AdminLevelResource {
 
     private Provider<EntityManager> entityManager;
     private AdminLevel level;
-    private BlobService blobService;
     
-    private WKTReader reader = new WKTReader();
-
 
     // TODO: create list of geoadmins per country
     private static final int SUPER_USER_ID = 3;
 
     public AdminLevelResource(Provider<EntityManager> entityManager,
-        BlobService blobService, AdminLevel level) {
+        AdminLevel level) {
         super();
         this.entityManager = entityManager;
-        this.blobService = blobService;
         this.level = level;
     }
 
@@ -306,9 +300,7 @@ public class AdminLevelResource {
             childEntity.setBounds(entity.getBounds());
             childEntity.setParent(em.getReference(AdminEntity.class,
                 entity.getParentId()));
-            if(entity.getGeometryText() != null) {
-                childEntity.setGeometry(reader.read(entity.getGeometryText()));
-            }
+            childEntity.setGeometry(entity.getGeometry());
             child.getEntities().add(childEntity);
             em.persist(childEntity);
         }

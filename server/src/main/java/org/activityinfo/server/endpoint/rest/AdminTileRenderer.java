@@ -35,6 +35,7 @@ import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.simplify.DouglasPeuckerSimplifier;
 
 public class AdminTileRenderer {
 
@@ -93,9 +94,12 @@ public class AdminTileRenderer {
          */
         LOGGER.info("Projecting geometry...");
         GeometryProjecter projector = new GeometryProjecter(map);
+
         Map<Integer, Geometry> projected = Maps.newHashMap();
         for (AdminEntity entity : entities) {
-            projected.put(entity.getId(), projector.transform(entity.getGeometry()));
+            Geometry transformed = projector.transform(entity.getGeometry());
+            Geometry simplified = DouglasPeuckerSimplifier.simplify(transformed, 1.25);
+            projected.put(entity.getId(), simplified);
         }
 
         /*

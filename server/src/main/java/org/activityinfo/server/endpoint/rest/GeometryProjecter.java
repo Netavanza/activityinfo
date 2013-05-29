@@ -28,18 +28,10 @@ public class GeometryProjecter extends GeometryTransformer {
         Coordinate outCoords[] = new Coordinate[n];
         int outIndex = 0;
 
-        int lastX = Integer.MIN_VALUE;
-        int lastY = Integer.MIN_VALUE;
         for (int i = 0; i != n; ++i) {
             Point px = map.fromLatLngToPixel(new AiLatLng(coords.getY(i), coords.getX(i)));
-            int x = px.getX();
-            int y = px.getY();
-            if (x != lastX || y != lastY || i == n - 1) {
-                outCoords[outIndex] = new Coordinate(px.getDoubleX(), px.getDoubleY());
-                outIndex++;
-                lastX = x;
-                lastY = y;
-            }
+            outCoords[outIndex] = new Coordinate(px.getDoubleX(), px.getDoubleY());
+            outIndex++;
         }
         return new CoordinateArraySequence(Arrays.copyOf(outCoords, outIndex));
 

@@ -1,5 +1,8 @@
 package org.activityinfo.geoadmin.model;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Bounds {
     private double x1, y1, x2, y2;
 

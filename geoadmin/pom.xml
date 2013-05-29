@@ -30,7 +30,7 @@
     <dependency>
       <groupId>com.bedatadriven</groupId>
       <artifactId>jackson-geojson</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
+      <version>0.7</version>
       <exclusions>
         <exclusion>
           <groupId>xerces</groupId>
@@ -94,4 +94,5 @@
       <url>http://nexus.bedatadriven.com/content/groups/public/</url>
     </repository>
   </repositories>
+  
 </project>
